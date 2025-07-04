@@ -109,7 +109,7 @@ int main(void)
 		 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // OFF = Fail
 	 }
 
-	 HAL_Delay(100);
+	 HAL_Delay(100); // 100 ms delay
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
