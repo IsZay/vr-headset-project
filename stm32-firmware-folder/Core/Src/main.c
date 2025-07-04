@@ -21,13 +21,17 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "string.h"
+#include <string.h>
+#include <stdio.h>
+
+#include "mpu6050.h"
 //#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 I2C_HandleTypeDef hi2c1;
+MPU6050_t mpu;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -98,6 +102,23 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_I2C_Mem_Read(&hi2c1, mpu_address, who_am_i_reg, 1, &who_am_i_value, 1, HAL_MAX_DELAY);
+
+
+  if (MPU6050_Init(&hi2c1) == HAL_OK) {
+      char buf[] = "MPU6050 connected.\r\n";
+      HAL_UART_Transmit(&huart1, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
+  } else {
+      // handle failure
+      char buf2[] = "MPU6050 not connected!\r\n";
+      char buf3[] = "Retry all over!\r\n";
+      while (1)
+      {
+    	  HAL_UART_Transmit(&huart1, (uint8_t*)buf2, strlen(buf2), HAL_MAX_DELAY);
+    	  HAL_Delay(2500);
+    	  HAL_UART_Transmit(&huart1, (uint8_t*)buf3, strlen(buf3), HAL_MAX_DELAY);
+    	  HAL_Delay(2500);
+      }
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,21 +128,15 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  char msg_ok[] = "MPU6050 connected.\r\n";
-	  char msg_fail[] = "MPU6050 not found!\r\n";
 
-	  if (who_am_i_value == 0x68)
-	  {
-		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // ON = OK
-		  HAL_UART_Transmit(&huart1, (uint8_t*)msg_ok, strlen(msg_ok), HAL_MAX_DELAY);
-	  }
-	  else
-	  {
-	 	 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // OFF = Fail
-	 	HAL_UART_Transmit(&huart1, (uint8_t*)msg_fail, strlen(msg_fail), HAL_MAX_DELAY);
-	  }
+    if (MPU6050_Read_All(&hi2c1, &mpu) == HAL_OK) {
+        char msg[128];
+        snprintf(msg, sizeof(msg), "A:%d,%d,%d G:%d,%d,%d\r\n",
+                 mpu.ax, mpu.ay, mpu.az, mpu.gx, mpu.gy, mpu.gz);
+        HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+    }
 
-	  HAL_Delay(100); // 100 ms delay
+    HAL_Delay(1000); // I want it to be somewhat slow right now
   }
   /* USER CODE END 3 */
 }
