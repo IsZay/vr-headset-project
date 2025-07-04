@@ -16,3 +16,6 @@
 /stm32-firmware-folder/build/
 *.elf
 *.hex
+
+#Ignore backup firmware too before I commit this to git
+/stm32-firmware-folder-CopyJic/
