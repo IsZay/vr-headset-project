@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <string.h>
+#include "string.h"
+//#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,7 +41,9 @@ I2C_HandleTypeDef hi2c1;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c1;
 
+UART_HandleTypeDef huart1; // I took away extern cuz it caused an error
 
 /* USER CODE BEGIN PV */
 uint8_t mpu_address = 0x68 << 1; // shifted for HAL // equal to 0xd0
@@ -52,6 +55,7 @@ uint8_t who_am_i_value = 0;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -91,6 +95,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_I2C_Mem_Read(&hi2c1, mpu_address, who_am_i_reg, 1, &who_am_i_value, 1, HAL_MAX_DELAY);
   /* USER CODE END 2 */
@@ -100,17 +105,23 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	 if (who_am_i_value == 0x68)
-	 {
-		 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // ON = OK
-	 }
-	 else
-	 {
-		 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // OFF = Fail
-	 }
 
-	 HAL_Delay(100); // 100 ms delay
     /* USER CODE BEGIN 3 */
+	  char msg_ok[] = "MPU6050 connected.\r\n";
+	  char msg_fail[] = "MPU6050 not found!\r\n";
+
+	  if (who_am_i_value == 0x68)
+	  {
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET); // ON = OK
+		  HAL_UART_Transmit(&huart1, (uint8_t*)msg_ok, strlen(msg_ok), HAL_MAX_DELAY);
+	  }
+	  else
+	  {
+	 	 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // OFF = Fail
+	 	HAL_UART_Transmit(&huart1, (uint8_t*)msg_fail, strlen(msg_fail), HAL_MAX_DELAY);
+	  }
+
+	  HAL_Delay(100); // 100 ms delay
   }
   /* USER CODE END 3 */
 }
@@ -191,6 +202,39 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -204,6 +248,7 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
