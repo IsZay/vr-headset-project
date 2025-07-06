@@ -25,4 +25,4 @@
 /vr-headset/venv/
 
 #Ignore
-.metadata
+.metadata/
