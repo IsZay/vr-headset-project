@@ -25,18 +25,19 @@
 #include <stdio.h>
 
 #include "mpu6050.h"
+#include "MahonyAHRS.h"
 //#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-I2C_HandleTypeDef hi2c1;
+//I2C_HandleTypeDef hi2c1;
 MPU6050_t mpu;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define DEG_TO_RAD (3.14159265359f / 180.0f);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -105,7 +106,7 @@ int main(void)
 
 
   if (MPU6050_Init(&hi2c1) == HAL_OK) {
-      char buf[] = "MPU6050 connected.\r\n";
+      char buf1[] = "MPU6050 connected.\r\n";
       HAL_UART_Transmit(&huart1, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
   } else {
       // handle failure
@@ -119,6 +120,10 @@ int main(void)
     	  HAL_Delay(2500);
       }
   }
+
+  float roll, pitch, yaw;
+  char buf[128];
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -129,14 +134,27 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-    if (MPU6050_Read_All(&hi2c1, &mpu) == HAL_OK) {
-        char msg[128];
-        snprintf(msg, sizeof(msg), "A:%d,%d,%d G:%d,%d,%d\r\n",
-                 mpu.ax, mpu.ay, mpu.az, mpu.gx, mpu.gy, mpu.gz);
-        HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-    }
+	    MPU6050_Read_All(&hi2c1, &mpu);
 
-    HAL_Delay(50); // Lets try it fasternow
+	    // Convert raw values to deg/s and g's
+	    float gx = mpu.Gx * DEG_TO_RAD;
+	    float gy = mpu.Gy * DEG_TO_RAD;
+	    float gz = mpu.Gz * DEG_TO_RAD;
+	    float ax = mpu.Ax;
+	    float ay = mpu.Ay;
+	    float az = mpu.Az;
+
+	    // Update Mahony filter (adjust sampleFreq as needed)
+	    MahonyAHRSupdateIMU(gx, gy, gz, ax, ay, az);
+
+	    // Convert quaternion to Euler
+	    MahonyQuaternionToEuler(&roll, &pitch, &yaw);  // You define this conversion
+
+	    // Send over UART (optional: use DMA)
+	    snprintf(buf, sizeof(buf), "RPY:%.2f,%.2f,%.2f\r\n", roll, pitch, yaw);
+	    HAL_UART_Transmit(&huart1, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
+
+	    HAL_Delay(10);  // ~100Hz
   }
   /* USER CODE END 3 */
 }
