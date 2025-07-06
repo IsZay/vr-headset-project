@@ -136,7 +136,7 @@ int main(void)
         HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     }
 
-    HAL_Delay(1000); // I want it to be somewhat slow right now
+    HAL_Delay(50); // Lets try it fasternow
   }
   /* USER CODE END 3 */
 }

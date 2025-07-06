@@ -19,3 +19,10 @@
 
 #Ignore backup firmware too before I commit this to git
 /stm32-firmware-folder-CopyJic/
+
+#Raspberry Pi things
+/venv/
+/vr-headset/venv/
+
+#Ignore
+.metadata
