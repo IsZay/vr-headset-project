@@ -107,7 +107,7 @@ int main(void)
 
   if (MPU6050_Init(&hi2c1) == HAL_OK) {
       char buf1[] = "MPU6050 connected.\r\n";
-      HAL_UART_Transmit(&huart1, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
+      HAL_UART_Transmit(&huart1, (uint8_t*)buf1, strlen(buf1), HAL_MAX_DELAY);
   } else {
       // handle failure
       char buf2[] = "MPU6050 not connected!\r\n";
@@ -137,12 +137,12 @@ int main(void)
 	    MPU6050_Read_All(&hi2c1, &mpu);
 
 	    // Convert raw values to deg/s and g's
-	    float gx = mpu.Gx * DEG_TO_RAD;
-	    float gy = mpu.Gy * DEG_TO_RAD;
-	    float gz = mpu.Gz * DEG_TO_RAD;
-	    float ax = mpu.Ax;
-	    float ay = mpu.Ay;
-	    float az = mpu.Az;
+	    float gx = mpu.gx * DEG_TO_RAD;
+	    float gy = mpu.gy * DEG_TO_RAD;
+	    float gz = mpu.gz * DEG_TO_RAD;
+	    float ax = mpu.ax;
+	    float ay = mpu.ay;
+	    float az = mpu.az;
 
 	    // Update Mahony filter (adjust sampleFreq as needed)
 	    MahonyAHRSupdateIMU(gx, gy, gz, ax, ay, az);

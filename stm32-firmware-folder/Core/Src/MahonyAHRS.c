@@ -214,6 +214,20 @@ void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float
 }
 
 //---------------------------------------------------------------------------------------------------
+// Convert from Quaternion to Euler (surprisingly I bet)
+
+void MahonyQuaternionToEuler(float* roll, float* pitch, float* yaw) {
+//    float q0 = Mahony_q0; // Chat must've been confused to suggest this
+//    float q1 = Mahony_q1;
+//    float q2 = Mahony_q2;
+//    float q3 = Mahony_q3;
+
+    *roll  = atan2f(2.0f * (q0*q1 + q2*q3), 1.0f - 2.0f * (q1*q1 + q2*q2));
+    *pitch = asinf(2.0f * (q0*q2 - q3*q1));
+    *yaw   = atan2f(2.0f * (q0*q3 + q1*q2), 1.0f - 2.0f * (q2*q2 + q3*q3));
+}
+
+//---------------------------------------------------------------------------------------------------
 // Fast inverse square-root
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 

@@ -25,6 +25,7 @@ extern volatile float q0, q1, q2, q3;	// quaternion of sensor frame relative to 
 
 void MahonyAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
 void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
+void MahonyQuaternionToEuler(float* roll, float* pitch, float* yaw); // Added
 
 #endif
 //=====================================================================================================
