@@ -106,7 +106,7 @@ def update(frame):
     rotated = rotate(cube_vertices, R)
 
     # Left eye (-eye_offset), Right eye (+eye_offset)
-    eye_offset = 0.3
+    eye_offset = 1.5 # Adjust this value for inter-pupillary distance
     left_proj = [project(p, -eye_offset) for p in rotated]
     right_proj = [project(p, +eye_offset) for p in rotated]
 
