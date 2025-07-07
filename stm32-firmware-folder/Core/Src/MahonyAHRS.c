@@ -228,7 +228,7 @@ void MahonyQuaternionToEuler(float* roll, float* pitch, float* yaw) {
 
     // Apply yaw drift compensation (adjust OFFSET_RATE as needed)
     static float yaw_drift_offset = 0.0f;
-    const float OFFSET_RATE = 0.03505f;  //TODO  between .03505 slighty decreasing and .0352 is slightly increasing
+    const float OFFSET_RATE = 0.034905;  //TODO  between .034905 slighty decreasing  and.03505 is slightly increasing
 
     yaw_drift_offset += OFFSET_RATE * (1.0f / sampleFreq); // Accumulate offset
     *yaw += yaw_drift_offset;  // Apply correction

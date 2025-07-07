@@ -162,9 +162,9 @@ int main(void)
 
 
 	    // Convert to degrees for display
-	    roll *= (180.0f / 3.14159265359f);
-	    pitch *= (180.0f / 3.14159265359f);
-	    yaw *= (180.0f / 3.14159265359f);
+//	    roll *= (180.0f / 3.14159265359f);
+//	    pitch *= (180.0f / 3.14159265359f);
+//	    yaw *= (180.0f / 3.14159265359f);
 
 	    // Send over UART (optional: use DMA)
 	    snprintf(buf, sizeof(buf), "RPY:%.2f,%.2f,%.2f\r\n", roll, pitch, yaw);
