@@ -20,9 +20,9 @@
 //---------------------------------------------------------------------------------------------------
 // Definitions
 
-#define sampleFreq	100.0f			// sample frequency in Hz (Update this if not working TODO)
-#define twoKpDef	(2.0f * 0.5f)	// 2 * proportional gain
-#define twoKiDef	(2.0f * 0.0f)	// 2 * integral gain
+#define sampleFreq	20.0f			// sample frequency in Hz (Update this to value of HAL_Delay(x) in main.c TODO)
+#define twoKpDef	(2.0f * 1.0f)	// 2 * proportional gain (deep seek changed from 0.5)
+#define twoKiDef	(2.0f * .05f)	// 2 * integral gain (deep seek changed from 0.0)
 
 //---------------------------------------------------------------------------------------------------
 // Variable definitions
@@ -225,6 +225,17 @@ void MahonyQuaternionToEuler(float* roll, float* pitch, float* yaw) {
     *roll  = atan2f(2.0f * (q0*q1 + q2*q3), 1.0f - 2.0f * (q1*q1 + q2*q2));
     *pitch = asinf(2.0f * (q0*q2 - q3*q1));
     *yaw   = atan2f(2.0f * (q0*q3 + q1*q2), 1.0f - 2.0f * (q2*q2 + q3*q3));
+
+    // Apply yaw drift compensation (adjust OFFSET_RATE as needed)
+    static float yaw_drift_offset = 0.0f;
+    const float OFFSET_RATE = 0.03505f;  //TODO  between .03505 slighty decreasing and .0352 is slightly increasing
+
+    yaw_drift_offset += OFFSET_RATE * (1.0f / sampleFreq); // Accumulate offset
+    *yaw += yaw_drift_offset;  // Apply correction
+
+    // Optional: Wrap yaw to [-180°, 180°] for cleanliness
+    if (*yaw > M_PI) *yaw -= 2.0f * M_PI;
+    else if (*yaw < -M_PI) *yaw += 2.0f * M_PI;
 }
 
 //---------------------------------------------------------------------------------------------------

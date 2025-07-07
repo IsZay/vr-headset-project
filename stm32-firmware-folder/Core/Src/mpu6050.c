@@ -24,17 +24,34 @@ HAL_StatusTypeDef MPU6050_Init(I2C_HandleTypeDef *hi2c) {
     return HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, PWR_MGMT_1, 1, &data, 1, HAL_MAX_DELAY);
 }
 
+// Deepseek?
 HAL_StatusTypeDef MPU6050_Read_All(I2C_HandleTypeDef *hi2c, MPU6050_t *data) {
     uint8_t raw[14];
     HAL_StatusTypeDef ret = HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, ACCEL_XOUT_H, 1, raw, 14, HAL_MAX_DELAY);
     if (ret != HAL_OK) return ret;
 
-    data->ax = (raw[0] << 8) | raw[1];
-    data->ay = (raw[2] << 8) | raw[3];
-    data->az = (raw[4] << 8) | raw[5];
-    data->gx = (raw[8] << 8) | raw[9];
-    data->gy = (raw[10] << 8) | raw[11];
-    data->gz = (raw[12] << 8) | raw[13];
+    // Raw readings
+    data->ax = (int16_t)((raw[0] << 8) | raw[1]);
+    data->ay = (int16_t)((raw[2] << 8) | raw[3]);
+    data->az = (int16_t)((raw[4] << 8) | raw[5]);
+    data->gx = (int16_t)((raw[8] << 8) | raw[9]);
+    data->gy = (int16_t)((raw[10] << 8) | raw[11]);
+    data->gz = (int16_t)((raw[12] << 8) | raw[13]);
 
     return HAL_OK;
 }
+
+//HAL_StatusTypeDef MPU6050_Read_All(I2C_HandleTypeDef *hi2c, MPU6050_t *data) {
+//    uint8_t raw[14];
+//    HAL_StatusTypeDef ret = HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, ACCEL_XOUT_H, 1, raw, 14, HAL_MAX_DELAY);
+//    if (ret != HAL_OK) return ret;
+//
+//    data->ax = (raw[0] << 8) | raw[1];
+//    data->ay = (raw[2] << 8) | raw[3];
+//    data->az = (raw[4] << 8) | raw[5];
+//    data->gx = (raw[8] << 8) | raw[9];
+//    data->gy = (raw[10] << 8) | raw[11];
+//    data->gz = (raw[12] << 8) | raw[13];
+//
+//    return HAL_OK;
+//}

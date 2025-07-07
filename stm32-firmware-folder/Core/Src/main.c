@@ -38,6 +38,9 @@ MPU6050_t mpu;
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define DEG_TO_RAD (3.14159265359f / 180.0f);
+// MPU6050 sensitivity scale factors
+#define GYRO_SCALE_FACTOR   (250.0f / 32768.0f)  // ±250dps range
+#define ACCEL_SCALE_FACTOR  (2.0f / 32768.0f)    // ±2g range
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -136,25 +139,38 @@ int main(void)
 
 	    MPU6050_Read_All(&hi2c1, &mpu);
 
-	    // Convert raw values to deg/s and g's
-	    float gx = mpu.gx * DEG_TO_RAD;
-	    float gy = mpu.gy * DEG_TO_RAD;
-	    float gz = mpu.gz * DEG_TO_RAD;
-	    float ax = mpu.ax;
-	    float ay = mpu.ay;
-	    float az = mpu.az;
+	    // Convert raw values to physical units
+	    float gx = mpu.gx * GYRO_SCALE_FACTOR * DEG_TO_RAD;  // rad/s
+	    float gy = mpu.gy * GYRO_SCALE_FACTOR * DEG_TO_RAD;
+	    float gz = mpu.gz * GYRO_SCALE_FACTOR * DEG_TO_RAD;
+	    float ax = mpu.ax * ACCEL_SCALE_FACTOR;  // g
+	    float ay = mpu.ay * ACCEL_SCALE_FACTOR;
+	    float az = mpu.az * ACCEL_SCALE_FACTOR;
 
 	    // Update Mahony filter (adjust sampleFreq as needed)
 	    MahonyAHRSupdateIMU(gx, gy, gz, ax, ay, az);
 
+	    // Debug print raw values
+	    char debug_buf[128];
+	    snprintf(debug_buf, sizeof(debug_buf),
+	        "Raw: gx=%.2f, gy=%.2f, gz=%.2f, ax=%.2f, ay=%.2f, az=%.2f\r\n",
+	        gx, gy, gz, ax, ay, az);
+	    HAL_UART_Transmit(&huart1, (uint8_t*)debug_buf, strlen(debug_buf), HAL_MAX_DELAY);
+
 	    // Convert quaternion to Euler
 	    MahonyQuaternionToEuler(&roll, &pitch, &yaw);  // You define this conversion
+
+
+	    // Convert to degrees for display
+	    roll *= (180.0f / 3.14159265359f);
+	    pitch *= (180.0f / 3.14159265359f);
+	    yaw *= (180.0f / 3.14159265359f);
 
 	    // Send over UART (optional: use DMA)
 	    snprintf(buf, sizeof(buf), "RPY:%.2f,%.2f,%.2f\r\n", roll, pitch, yaw);
 	    HAL_UART_Transmit(&huart1, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
 
-	    HAL_Delay(10);  // ~100Hz
+	    HAL_Delay(50);  //10 if ~100Hz
   }
   /* USER CODE END 3 */
 }
