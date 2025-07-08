@@ -1,0 +1,1 @@
+/usr/bin/c++ "CMakeFiles/vr-cube.dir/main.cpp.o" "CMakeFiles/vr-cube.dir/uart.cpp.o" -o vr-cube  -lSDL2 -lGLESv2 -lEGL 

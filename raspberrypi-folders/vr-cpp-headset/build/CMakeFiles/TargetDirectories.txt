@@ -1,0 +1,3 @@
+/home/isaia/vr-cpp-headset/build/CMakeFiles/vr-cube.dir
+/home/isaia/vr-cpp-headset/build/CMakeFiles/edit_cache.dir
+/home/isaia/vr-cpp-headset/build/CMakeFiles/rebuild_cache.dir
